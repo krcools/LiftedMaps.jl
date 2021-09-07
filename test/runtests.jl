@@ -9,6 +9,9 @@ import LiftedMaps.LinearMaps
 
     U = 1:13
     V = 1:13
+
+    I = 1:10
+    J = 11:13
     
     Alifted = LiftedMap(A, 1:10, 1:10, U, V)
     Blifted = LiftedMap(B, 11:13, 11:13, U, V)
@@ -27,5 +30,16 @@ import LiftedMaps.LinearMaps
     @test D isa LinearMaps.LinearMap
     @test D isa LinearMaps.LinearCombination
     @test isblockdiagonal(D)
+
+    x = rand(13)
+    x1 = x[I]
+    x2 = x[J]
+
+    y1 = A * x1
+    y2 = 2 * B * x2
+    y = [y1; y2]
+
+    z = D * x
+    @test y ≈ z
 
 end

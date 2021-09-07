@@ -14,11 +14,12 @@ struct LiftedMap{T,TI,TJ,TM,TN} <: LinearMap{T}
 end
 
 LiftedMap(A::AbstractMatrix, I, J, M, N) = LiftedMap(LinearMap(A), I, J, M, N)
+LinearMaps.MulStyle(A::LiftedMap) = LinearMaps.FiveArg()
 
 Base.size(A::LiftedMap) = (length(A.M), length(A.N))
 
 function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap,
-    x::AbstractVector, α::Number, β::Number)
+    x::AbstractVector, α::Number=1, β::Number=0)
 
     yI = view(y, L.I)
     xJ = view(x, L.J)
