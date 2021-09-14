@@ -4,6 +4,7 @@ export LiftedMap, isondiagonal, isblockdiagonal
 
 using LinearMaps
 using LinearAlgebra
+using BlockArrays
 
 struct LiftedMap{T,TI,TJ,TM,TN} <: LinearMap{T}
     A::LinearMap{T}
@@ -17,14 +18,45 @@ LiftedMap(A::AbstractMatrix, I, J, M, N) = LiftedMap(LinearMap(A), I, J, M, N)
 LinearMaps.MulStyle(A::LiftedMap) = LinearMaps.FiveArg()
 
 Base.size(A::LiftedMap) = (length(A.M), length(A.N))
+Base.axes(A::LiftedMap) = (A.M, A.N)
+Base.axes(A::LiftedMap, i::Int) = axes(A)[i]
 
 function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap,
-    x::AbstractVector, α::Number=1, β::Number=0)
+    x::AbstractVector, α::Number, β::Number)
 
-    yI = view(y, L.I)
-    xJ = view(x, L.J)
+    bvy = PseudoBlockVector(y, blocksizes(L.M)...)
+    bvx = PseudoBlockVector(x, blocksizes(L.N)...)
+
+    yI = view(bvy, L.I)
+    xJ = view(bvx, L.J)
     AIJ = L.A
-    LinearAlgebra.mul!(yI, AIJ, xJ, α, β)
+
+    y .*= β
+    LinearAlgebra.mul!(yI, AIJ, xJ, α, 1)
+    return y
+end
+
+
+
+function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap, x::AbstractVector)
+
+    bvy = PseudoBlockVector(y, blocksizes(L.M)...)
+    bvx = PseudoBlockVector(x, blocksizes(L.N)...)
+
+    yI = view(bvy, L.I)
+    xJ = view(bvx, L.J)
+    AIJ = L.A
+
+    fill!(y,0)
+    LinearAlgebra.mul!(yI, AIJ, xJ)
+    return y
+end
+
+function Base.:(*)(A::LiftedMap, x::AbstractVector)
+    T = promote_type(eltype(A), eltype(x))
+    y = PseudoBlockVector{T}(undef, BlockArrays.blocksizes(A,1))
+    fill!(y, zero(T))
+    LinearAlgebra.mul!(y, A, x)
 end
 
 
