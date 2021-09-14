@@ -1,19 +1,19 @@
 name = "LiftedMaps"
 uuid = "d22a30c1-52ac-4762-a8c9-5838452405e0"
 authors = ["Kristof Cools <krcools@gmail.com> and contributors"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 BlockArrays = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LinearMaps = "7a12625a-238d-50fd-b39a-03d52299707e"
 
-[compat]
-LinearMaps = "3"
-julia = "1.3"
-
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+julia = "1.3"
+LinearMaps = "3"
 
 [targets]
 test = ["Test"]
