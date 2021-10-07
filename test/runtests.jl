@@ -42,4 +42,8 @@ import LiftedMaps.LinearMaps
     z = D * x
     @test y ≈ z
 
+    Amatrix = Matrix(Alifted)
+    @test Amatrix isa Matrix
+    @test Amatrix[I,I] == A
+
 end

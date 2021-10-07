@@ -60,6 +60,21 @@ function Base.:(*)(A::LiftedMap, x::AbstractVector)
 end
 
 
+function Base.Matrix{T}(A::LiftedMap) where {T}
+    # M = zeros(T, size(A))
+    M = PseudoBlockMatrix{T}(undef, BlockArrays.blocksizes(A)...)
+    m = Matrix(A.A)
+    M[A.I,A.J] .= m
+    return M
+end
+
+function Base.Matrix{T}(A::LinearMaps.ScaledMap{<:Any, <:Any, <:LiftedMap}) where {T}
+    M = Matrix(A.lmap)
+    M .*= A.λ
+    return M
+end
+
+
 function isondiagonal(A::LiftedMaps.LiftedMap)
     return A.I == A.J
 end
