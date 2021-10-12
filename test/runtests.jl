@@ -1,4 +1,5 @@
 using LiftedMaps
+using BlockArrays
 using Test
 
 import LiftedMaps.LinearMaps
@@ -7,8 +8,8 @@ import LiftedMaps.LinearMaps
     A = rand(10,10)
     B = rand(3,3)
 
-    U = 1:13
-    V = 1:13
+    U = Base.OneTo(13)
+    V = Base.OneTo(13)
 
     I = 1:10
     J = 11:13
@@ -46,4 +47,13 @@ import LiftedMaps.LinearMaps
     @test Amatrix isa Matrix
     @test Amatrix[I,I] == A
 
+    ax1 = blockedrange([10,3])
+    ax2 = blockedrange([10,3])
+    Alifted = @inferred LiftedMap(A,Block(1),Block(1),ax1,ax2)
+    Blifted = @inferred LiftedMap(B,Block(2),Block(2),ax1,ax2)
+    @test axes(Alifted) === (ax1,ax2)
+    @test axes(Blifted) === (ax1,ax2)
+
+    D = Alifted + 2 * Blifted
+    z = @inferred D * x
 end
