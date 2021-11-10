@@ -21,6 +21,9 @@ Base.size(A::LiftedMap) = (length(A.M), length(A.N))
 Base.axes(A::LiftedMap) = (A.M, A.N)
 Base.axes(A::LiftedMap, i::Int) = axes(A)[i]
 
+LinearAlgebra.adjoint(A::LiftedMap) = LiftedMap(adjoint(A.A), A.J, A.I, A.N, A.M)
+LinearAlgebra.transpose(A::LiftedMap) = LiftedMap(transpose(A.A), A.J, A.I, A.N, A.M)
+
 function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap,
     x::AbstractVector, α::Number, β::Number)
 
@@ -37,6 +40,25 @@ function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap,
 end
 
 
+# function LinearAlgebra.mul!(y::AbstractVector,
+#     Lt::LinearMaps.TransposeMap{<:Any,<:LiftedMap},
+#     x::AbstractVector, α::Number, β::Number)
+
+#     L = Lt.lmap
+
+#     bvy = PseudoBlockVector(y, blocksizes(L.N)...)
+#     bvx = PseudoBlockVector(x, blocksizes(L.M)...)
+
+#     yJ = view(bvy, L.J)
+#     xI = view(bvx, L.I)
+#     AIJ = L.A
+
+#     y .*= β
+#     LinearAlgebra.mul!(yJ, transpose(AIJ), xI, α, 1)
+#     return y
+# end
+
+
 
 function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap, x::AbstractVector)
 
@@ -51,6 +73,23 @@ function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap, x::AbstractVector)
     LinearAlgebra.mul!(yI, AIJ, xJ)
     return y
 end
+
+
+# function LinearAlgebra.mul!(y::AbstractVector, Lt::LinearMaps.TransposeMap{<:Any,<:LiftedMap}, x::AbstractVector)
+
+#     L = Lt.lmap
+
+#     bvy = PseudoBlockVector(y, blocksizes(L.N)...)
+#     bvx = PseudoBlockVector(x, blocksizes(L.M)...)
+
+#     yJ = view(bvy, L.J)
+#     xI = view(bvx, L.I)
+#     AIJ = L.A
+
+#     fill!(y,0)
+#     LinearAlgebra.mul!(yJ, transpose(AIJ), xI)
+#     return y
+# end
 
 function Base.:(*)(A::LiftedMap, x::AbstractVector)
     axes(A,2) == axes(x,1) ||
