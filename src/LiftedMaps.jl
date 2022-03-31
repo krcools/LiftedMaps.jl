@@ -39,25 +39,21 @@ function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap,
     return y
 end
 
+LinearAlgebra.mul!(X::AbstractMatrix, s::Number, A::LinearMaps.VecOrMatMap, α::Number, β::Number) =
+    mul!(X, s, A.lmap, α, β)
 
-# function LinearAlgebra.mul!(y::AbstractVector,
-#     Lt::LinearMaps.TransposeMap{<:Any,<:LiftedMap},
-#     x::AbstractVector, α::Number, β::Number)
+function LinearAlgebra.mul!(Y::PseudoBlockMatrix, c::Number, X::LiftedMap, a::Number, b::Number)
+    YIJ = view(Y, X.I, X.J)
+    mul!(YIJ, c, X.A, a, b)
+    return Y
+end
 
-#     L = Lt.lmap
 
-#     bvy = PseudoBlockVector(y, blocksizes(L.N)...)
-#     bvx = PseudoBlockVector(x, blocksizes(L.M)...)
+function LinearAlgebra.mul!(Y::PseudoBlockMatrix, c::Number,
+    X::LinearMaps.ScaledMap{<:Number,<:Number,<:LiftedMap}, a::Number, b::Number)
 
-#     yJ = view(bvy, L.J)
-#     xI = view(bvx, L.I)
-#     AIJ = L.A
-
-#     y .*= β
-#     LinearAlgebra.mul!(yJ, transpose(AIJ), xI, α, 1)
-#     return y
-# end
-
+    mul!(Y, c, X.lmap, a*X.λ, b)
+end
 
 
 function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap, x::AbstractVector)
@@ -75,22 +71,6 @@ function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap, x::AbstractVector)
 end
 
 
-# function LinearAlgebra.mul!(y::AbstractVector, Lt::LinearMaps.TransposeMap{<:Any,<:LiftedMap}, x::AbstractVector)
-
-#     L = Lt.lmap
-
-#     bvy = PseudoBlockVector(y, blocksizes(L.N)...)
-#     bvx = PseudoBlockVector(x, blocksizes(L.M)...)
-
-#     yJ = view(bvy, L.J)
-#     xI = view(bvx, L.I)
-#     AIJ = L.A
-
-#     fill!(y,0)
-#     LinearAlgebra.mul!(yJ, transpose(AIJ), xI)
-#     return y
-# end
-
 function Base.:(*)(A::LiftedMap, x::AbstractVector)
     axes(A,2) == axes(x,1) ||
         throw(DimensionMismatch("second dimension of left factor, $(size(A, 2)), " *
@@ -104,8 +84,6 @@ end
 
 
 function Base.Matrix{T}(A::LiftedMap) where {T}
-    # M = zeros(T, size(A))
-    # M = PseudoBlockMatrix{T}(undef, BlockArrays.blocksizes(A)...)
     M = similar(Array{T}, axes(A))
     fill!(M,0)
     m = Matrix(A.A)
@@ -118,7 +96,6 @@ function Base.Matrix{T}(A::LinearMaps.ScaledMap{<:Any, <:Any, <:LiftedMap}) wher
     M .*= A.λ
     return M
 end
-
 
 function isondiagonal(A::LiftedMaps.LiftedMap)
     return A.I == A.J

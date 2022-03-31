@@ -1,6 +1,7 @@
 using LiftedMaps
 using BlockArrays
 using Test
+using LinearAlgebra
 
 import LiftedMaps.LinearMaps
 
@@ -56,4 +57,18 @@ import LiftedMaps.LinearMaps
 
     D = Alifted + 2 * Blifted
     z = @inferred D * x
+end
+
+@testset "tomatrix" begin
+    ax1 = blockedrange((2,2,3))
+    ax2 = blockedrange((1,1,5))
+
+    block = rand(2,5)
+
+    A = LiftedMap(block, Block(1), Block(3), ax1, ax2)
+    B = zeros((ax1,ax2))
+
+    mul!(B, 1, A, 1, 1)
+
+    @test Matrix(A) ≈ Matrix(B)
 end
