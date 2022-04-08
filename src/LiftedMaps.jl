@@ -39,21 +39,19 @@ function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap,
     return y
 end
 
-LinearAlgebra.mul!(X::AbstractMatrix, s::Number, A::LinearMaps.VecOrMatMap, α::Number, β::Number) =
-    mul!(X, s, A.lmap, α, β)
 
-function LinearAlgebra.mul!(Y::PseudoBlockMatrix, c::Number, X::LiftedMap, a::Number, b::Number)
+function LinearAlgebra.mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number, b::Number)
     YIJ = view(Y, X.I, X.J)
-    mul!(YIJ, c, X.A, a, b)
+    mul!(YIJ, X.A, c, a, b)
     return Y
 end
 
+# function LinearMaps._unsafe_mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number, b::Number)
+#     YIJ = view(Y, X.I, X.J)
+#     LinearMaps._unsafe_mul!(YIJ, X.A, c, a, b)
+#     return Y
+# end
 
-function LinearAlgebra.mul!(Y::PseudoBlockMatrix, c::Number,
-    X::LinearMaps.ScaledMap{<:Number,<:Number,<:LiftedMap}, a::Number, b::Number)
-
-    mul!(Y, c, X.lmap, a*X.λ, b)
-end
 
 
 function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap, x::AbstractVector)
@@ -70,32 +68,6 @@ function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap, x::AbstractVector)
     return y
 end
 
-
-function Base.:(*)(A::LiftedMap, x::AbstractVector)
-    axes(A,2) == axes(x,1) ||
-        throw(DimensionMismatch("second dimension of left factor, $(size(A, 2)), " *
-                "does not match first dimension of right factor, $(size(x, 1))"))
-
-    T = promote_type(eltype(A), eltype(x))
-    y = PseudoBlockVector{T}(undef, BlockArrays.blocksizes(A,1))
-    fill!(y, zero(T))
-    LinearAlgebra.mul!(y, A, x)
-end
-
-
-function Base.Matrix{T}(A::LiftedMap) where {T}
-    M = similar(Array{T}, axes(A))
-    fill!(M,0)
-    m = Matrix(A.A)
-    M[A.I,A.J] .= m
-    return Matrix{T}(M)
-end
-
-function Base.Matrix{T}(A::LinearMaps.ScaledMap{<:Any, <:Any, <:LiftedMap}) where {T}
-    M = Matrix{T}(A.lmap)
-    M .*= A.λ
-    return M
-end
 
 function isondiagonal(A::LiftedMaps.LiftedMap)
     return A.I == A.J

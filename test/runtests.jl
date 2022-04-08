@@ -68,7 +68,14 @@ end
     A = LiftedMap(block, Block(1), Block(3), ax1, ax2)
     B = zeros((ax1,ax2))
 
-    mul!(B, 1, A, 1, 1)
+    mul!(B, A, 1, 1, 1)
 
+    @test Matrix(A) isa Matrix
+    @test Matrix(B) isa Matrix
     @test Matrix(A) ≈ Matrix(B)
+
+    x = rand(size(A,2))
+    b = A*x
+
+    @test blocksizes(b,1) == [2,2,3]
 end
