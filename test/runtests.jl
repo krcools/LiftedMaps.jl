@@ -5,7 +5,7 @@ using LinearAlgebra
 
 import LiftedMaps.LinearMaps
 
-@testset "LiftedMaps.jl" begin
+# @testset "LiftedMaps.jl" begin
     A = rand(10,10)
     B = rand(3,3)
 
@@ -57,9 +57,9 @@ import LiftedMaps.LinearMaps
 
     D = Alifted + 2 * Blifted
     z = @inferred D * x
-end
+# end
 
-@testset "tomatrix" begin
+# @testset "tomatrix" begin
     ax1 = blockedrange((2,2,3))
     ax2 = blockedrange((1,1,5))
 
@@ -78,4 +78,4 @@ end
     b = A*x
 
     @test blocksizes(b,1) == [2,2,3]
-end
+# end

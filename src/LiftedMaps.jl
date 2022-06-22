@@ -4,7 +4,7 @@ export LiftedMap, isondiagonal, isblockdiagonal
 
 using LinearMaps
 using LinearAlgebra
-using BlockArrays
+# using BlockArrays
 
 struct LiftedMap{T,TI,TJ,TM,TN} <: LinearMap{T}
     A::LinearMap{T}
@@ -24,50 +24,41 @@ Base.axes(A::LiftedMap, i::Int) = axes(A)[i]
 LinearAlgebra.adjoint(A::LiftedMap) = LiftedMap(adjoint(A.A), A.J, A.I, A.N, A.M)
 LinearAlgebra.transpose(A::LiftedMap) = LiftedMap(transpose(A.A), A.J, A.I, A.N, A.M)
 
-function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap,
-    x::AbstractVector, α::Number, β::Number)
+function LinearMaps._unsafe_mul!(y::AbstractVector, L::LiftedMap,
+    x::AbstractVector, α::Number=true, β::Number=true)
 
-    bvy = PseudoBlockVector(y, blocksizes(L.M)...)
-    bvx = PseudoBlockVector(x, blocksizes(L.N)...)
+    temp = y
 
-    yI = view(bvy, L.I)
-    xJ = view(bvx, L.J)
+    # Imbue input and output with the axes structure of L
+    y = view(y, axes(L,1))
+    x = view(x, axes(L,2))
+
+    I = L.I
+    J = L.J
+
+    yI = view(y, I)
+    xJ = view(x, J)
     AIJ = L.A
 
     y .*= β
-    LinearAlgebra.mul!(yI, AIJ, xJ, α, 1)
-    return y
+    LinearMaps._unsafe_mul!(yI, AIJ, xJ, α, 1)
+    return temp
 end
 
 
-function LinearAlgebra.mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number, b::Number)
-    YIJ = view(Y, X.I, X.J)
-    mul!(YIJ, X.A, c, a, b)
-    return Y
+function LinearMaps._unsafe_mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number, b::Number)
+
+    temp = Y
+
+    Y = view(Y, axes(X)...)
+    I = X.I
+    J = X.J
+
+    YIJ = view(Y, I, J)
+    XIJ = X.A
+    LinearMaps._unsafe_mul!(YIJ, X.A, c, a, b)
+    return temp
 end
-
-# function LinearMaps._unsafe_mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number, b::Number)
-#     YIJ = view(Y, X.I, X.J)
-#     LinearMaps._unsafe_mul!(YIJ, X.A, c, a, b)
-#     return Y
-# end
-
-
-
-function LinearAlgebra.mul!(y::AbstractVector, L::LiftedMap, x::AbstractVector)
-
-    bvy = PseudoBlockVector(y, blocksizes(L.M)...)
-    bvx = PseudoBlockVector(x, blocksizes(L.N)...)
-
-    yI = view(bvy, L.I)
-    xJ = view(bvx, L.J)
-    AIJ = L.A
-
-    fill!(y,0)
-    LinearAlgebra.mul!(yI, AIJ, xJ)
-    return y
-end
-
 
 function isondiagonal(A::LiftedMaps.LiftedMap)
     return A.I == A.J
