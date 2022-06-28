@@ -25,8 +25,9 @@ LinearAlgebra.adjoint(A::LiftedMap) = LiftedMap(adjoint(A.A), A.J, A.I, A.N, A.M
 LinearAlgebra.transpose(A::LiftedMap) = LiftedMap(transpose(A.A), A.J, A.I, A.N, A.M)
 
 function LinearMaps._unsafe_mul!(y::AbstractVector, L::LiftedMap,
-    x::AbstractVector, α::Number=true, β::Number=true)
+    x::AbstractVector, α::Number=true, β::Number=false)
 
+    y .*= β
     temp = y
 
     # Imbue input and output with the axes structure of L
@@ -40,14 +41,15 @@ function LinearMaps._unsafe_mul!(y::AbstractVector, L::LiftedMap,
     xJ = view(x, J)
     AIJ = L.A
 
-    y .*= β
-    LinearMaps._unsafe_mul!(yI, AIJ, xJ, α, 1)
+
+    LinearMaps._unsafe_mul!(yI, AIJ, xJ, α, true)
     return temp
 end
 
 
-function LinearMaps._unsafe_mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number, b::Number)
+function LinearMaps._unsafe_mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number=true, b::Number=false)
 
+    Y .*= b
     temp = Y
 
     Y = view(Y, axes(X)...)
@@ -56,7 +58,7 @@ function LinearMaps._unsafe_mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::
 
     YIJ = view(Y, I, J)
     XIJ = X.A
-    LinearMaps._unsafe_mul!(YIJ, X.A, c, a, b)
+    LinearMaps._unsafe_mul!(YIJ, X.A, c, a, true)
     return temp
 end
 
