@@ -51,7 +51,8 @@ end
 
 function LinearMaps._unsafe_mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number=true, b::Number=false)
 
-    Y .*= b
+    # Y .*= b
+    LinearAlgebra.rmul!(Y, b)
     temp = Y
 
     # Imbue Y with the axes of X
