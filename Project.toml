@@ -1,7 +1,7 @@
 name = "LiftedMaps"
 uuid = "d22a30c1-52ac-4762-a8c9-5838452405e0"
 authors = ["Kristof Cools <krcools@gmail.com> and contributors"]
-version = "0.5.0"
+version = "0.5.1"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
