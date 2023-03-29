@@ -56,7 +56,8 @@ import LiftedMaps.LinearMaps
     @test axes(Blifted) === (ax1,ax2)
 
     D = Alifted + 2 * Blifted
-    z = @inferred D * x
+    p = similar(x, axes(D,2))
+    z = @inferred D * p
 # end
 
 # @testset "tomatrix" begin
@@ -74,8 +75,8 @@ import LiftedMaps.LinearMaps
     @test Matrix(B) isa Matrix
     @test Matrix(A) ≈ Matrix(B)
 
-    x = rand(size(A,2))
-    b = A*x
+    q = similar(x, axes(A,2))
+    b = A*q
 
     @test blocksizes(b,1) == [2,2,3]
 # end

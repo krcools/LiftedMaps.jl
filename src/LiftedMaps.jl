@@ -30,17 +30,16 @@ function LinearMaps._unsafe_mul!(y::AbstractVector, L::LiftedMap,
     y .*= β
     temp = y
 
-    # Imbue input and output with the axes structure of L
-    # y = view(y, axes(L,1))
-    # x = view(x, axes(L,2))
-    y = SubArray(y, (axes(L,1),))
-    x = SubArray(x, (axes(L,2),))
-
     I = L.I
     J = L.J
 
-    yI = view(y, I)
-    xJ = view(x, J)
+    P = getindex(axes(L,1), I)
+    Q = getindex(axes(L,2), J)
+
+    # yI = view(y, I)
+    # xJ = view(x, J)
+    yI = view(y, P)
+    xJ = view(x, Q)
     AIJ = L.A
 
 
@@ -51,18 +50,16 @@ end
 
 function LinearMaps._unsafe_mul!(Y::AbstractMatrix, X::LiftedMap, c::Number, a::Number=true, b::Number=false)
 
-    # Y .*= b
     LinearAlgebra.rmul!(Y, b)
     temp = Y
-
-    # Imbue Y with the axes of X
-    Y = SubArray(Y, axes(X))
-    # Y = view(Y, axes(X)...)
 
     I = X.I
     J = X.J
 
-    YIJ = view(Y, I, J)
+    P = getindex(axes(X,1), I)
+    Q = getindex(axes(X,2), J)
+
+    YIJ = view(Y, P, Q)
     XIJ = X.A
     LinearMaps._unsafe_mul!(YIJ, X.A, c, a, true)
     return temp
