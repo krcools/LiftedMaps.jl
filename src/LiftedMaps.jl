@@ -27,7 +27,11 @@ LinearAlgebra.transpose(A::LiftedMap) = LiftedMap(transpose(A.A), A.J, A.I, A.N,
 function LinearMaps._unsafe_mul!(y::AbstractVector, L::LiftedMap,
     x::AbstractVector, α::Number=true, β::Number=false)
 
-    y .*= β
+    # y .*= β
+    # y .= y .* β
+    for i in eachindex(y)
+        y[i] = y[i] * β
+    end
     temp = y
 
     I = L.I
