@@ -80,3 +80,6 @@ import LiftedMaps.LinearMaps
 
     @test blocksizes(b,1) == [2,2,3]
 # end
+
+using TestItemRunner
+@run_package_tests

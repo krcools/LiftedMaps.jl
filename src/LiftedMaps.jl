@@ -4,7 +4,7 @@ export LiftedMap, isondiagonal, isblockdiagonal
 
 using LinearMaps
 using LinearAlgebra
-# using BlockArrays
+using BlockArrays
 
 struct LiftedMap{T,TI,TJ,TM,TN} <: LinearMap{T}
     A::LinearMap{T}
@@ -44,6 +44,57 @@ function LinearMaps._unsafe_mul!(y::AbstractVector, L::LiftedMap,
     # xJ = view(x, J)
     yI = view(y, P)
     xJ = view(x, Q)
+    AIJ = L.A
+
+    @show typeof(yI)
+    @show typeof(xJ)
+
+    LinearMaps._unsafe_mul!(yI, AIJ, xJ, α, true)
+    return temp
+end
+
+
+function LinearMaps._unsafe_mul!(y::AbstractBlockVector, L::LiftedMap,
+    x::AbstractVector, α::Number=true, β::Number=false)
+
+    y .*= β
+    temp = y
+
+    I = L.I
+    J = L.J
+
+    Q = getindex(axes(L,2), J)
+    # P = getindex(axes(L,1), I)
+
+    # xJ = view(x, J)
+    yI = view(y, I)
+    xJ = view(x, Q)
+    # yI = view(y, P)
+
+    AIJ = L.A
+
+
+    LinearMaps._unsafe_mul!(yI, AIJ, xJ, α, true)
+    return temp
+end
+
+
+function LinearMaps._unsafe_mul!(y::AbstractBlockVector, L::LiftedMap,
+    x::AbstractBlockVector, α::Number=true, β::Number=false)
+
+    y .*= β
+    temp = y
+
+    I = L.I
+    J = L.J
+
+    # P = getindex(axes(L,1), I)
+    # Q = getindex(axes(L,2), J)
+
+    yI = view(y, I)
+    xJ = view(x, J)
+    # yI = view(y, P)
+    # xJ = view(x, Q)
     AIJ = L.A
 
 
