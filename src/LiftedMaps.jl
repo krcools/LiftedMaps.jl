@@ -46,8 +46,8 @@ function LinearMaps._unsafe_mul!(y::AbstractVector, L::LiftedMap,
     xJ = view(x, Q)
     AIJ = L.A
 
-    @show typeof(yI)
-    @show typeof(xJ)
+    # @show typeof(yI)
+    # @show typeof(xJ)
 
     LinearMaps._unsafe_mul!(yI, AIJ, xJ, α, true)
     return temp
@@ -70,6 +70,31 @@ function LinearMaps._unsafe_mul!(y::AbstractBlockVector, L::LiftedMap,
     yI = view(y, I)
     xJ = view(x, Q)
     # yI = view(y, P)
+
+    AIJ = L.A
+
+
+    LinearMaps._unsafe_mul!(yI, AIJ, xJ, α, true)
+    return temp
+end
+
+
+function LinearMaps._unsafe_mul!(y::AbstractVector, L::LiftedMap,
+    x::AbstractBlockVector, α::Number=true, β::Number=false)
+
+    y .*= β
+    temp = y
+
+    I = L.I
+    J = L.J
+
+    # Q = getindex(axes(L,2), J)
+    P = getindex(axes(L,1), I)
+
+    xJ = view(x, J)
+    # yI = view(y, I)
+    # xJ = view(x, Q)
+    yI = view(y, P)
 
     AIJ = L.A
 

@@ -2,4 +2,5 @@
 examples/Manifest.toml
 /test/Manifest.toml
 /dev/
-/.vscode
+/.vscode/
+
